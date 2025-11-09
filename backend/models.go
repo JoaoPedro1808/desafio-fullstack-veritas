@@ -1,9 +1,9 @@
 package main
 
 const (
-	aFazer = "A Fazer"
-	emProgresso = "Em Progresso"
-	concluido = "Concluídas"
+	AFazer = "A Fazer"
+	EmProgresso = "Em Progresso"
+	Concluido = "Concluídas"
 )
 
 type Task struct {
@@ -13,9 +13,9 @@ type Task struct {
 	Status string `json:"status"`
 }
 
-func validar(status string) bool {
+func Validar(status string) bool {
 	switch status {
-		case aFazer, emProgresso, concluido:
+		case AFazer, EmProgresso, Concluido:
 			return true
 		default:
 			return false

@@ -47,3 +47,24 @@
   font-size: 14px;
 }
 
+.addtask {
+  display: block;
+  width: calc(100% - 24px);
+  margin: 0 12px 12px 12px;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+  background-color: #f9f9f9;
+  border: 2px dashed #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.addtask:hover {
+  background-color: #e3f2fd;
+  color: #667eea;
+  border-color: #667eea;
+}
+

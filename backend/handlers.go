@@ -46,8 +46,8 @@ func createTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Verifica o status da tarefa, se não for informado, define como "A Fazer"
 	if task.Status == "" {
-		task.Status = aFazer
-	} else if !validar(task.Status) {
+		task.Status = AFazer
+	} else if !Validar(task.Status) {
 		msg := fmt.Sprintf("Status inválido: %s", task.Status)
 		erroResponse(w, http.StatusBadRequest, msg)
 		return

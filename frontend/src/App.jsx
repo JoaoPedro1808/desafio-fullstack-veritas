@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
 import Column from './assets/components/Column';
 import './App.css';
@@ -24,6 +24,8 @@ const emptyBoard = {
     },
     columnOrder: ["column-1", "column-2", "column-3"]
 };
+
+const API = "http://localhost:8080";
 
 /**
  * @param {Array} tasksArray
@@ -76,60 +78,85 @@ function App() {
         return () => clearTimeout(timer);
     }, []);
 
-    useEffect(() => {
-        let isMounted = true;
-        let timeoutId;
-        
-        const stopLoading = () => {
-            if (isMounted) {
+    const fetchTask = useCallback(() =>{
+        console.log("--- INICIANDO FETCH TASK ---");
+        setLoading(true);
+        setError(null);
+
+        fetch(`${API}/tasks`)
+            .then(response => {
+                console.log("FETCH: Resposta recebida", response.status);
+                if (!response.ok) {
+                    throw new Error("Falha ao buscar dados");
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("FETCH: Dados recebidos JSON", data);
+                const tasksArray = data.data || data || [];
+                const formatedBoard = formatData(tasksArray);
+                setBoard(formatedBoard);
                 setLoading(false);
-            }
-        };
-        
-        timeoutId = setTimeout(() => {
-            if (isMounted) {
-                setError("Erro de conexão com banco de dados, tentando reconexão");
+                setError(null);
+            })
+            .catch(error => {
+                console.error("FETCH: Erro capturado", error);
                 setBoard(emptyBoard);
-                stopLoading();
-            }
-        }, 2000);
+                setLoading(false);
+                setError("Erro de conexão com os dados")
+            })
+            .finally(() => {
+                console.log("--- FINALIZANDO FETCH TASK (setLoading false) ---");
+                setLoading(false);
+            });
+    }, []);
 
-        // Tentar buscar dados
-        fetch("http://localhost:8080/tasks")
-        .then(response => {
-            console.log("Response recebida:", response.status, response.statusText);
-            if (timeoutId) clearTimeout(timeoutId);
-            if (!response.ok) {
-                throw new Error(`Falha ao buscar dados: ${response.status} ${response.statusText}`);  
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (!isMounted) {
-                console.log("Componente desmontado, ignorando resposta");
-                return;
-            }
-            if (timeoutId) clearTimeout(timeoutId);
-            const tasksArray = data.data || data || [];
-            const formattedBoard = formatData(tasksArray);
-            setBoard(formattedBoard);
-            stopLoading();
-            setError(null);
-        })
-        .catch(error => {
-            if (!isMounted) {
-                return;
-            }
-            if (timeoutId) clearTimeout(timeoutId);
-            setBoard(emptyBoard);
-            stopLoading();
-        })
-
-        return () => {
-            isMounted = false;
-            if (timeoutId) clearTimeout(timeoutId);
+    const handlerCreate = async (nome) => {
+        const newTaskData = {
+            nome: nome,
+            desc: "",
+            status: "A Fazer",
         };
-    }, [])
+
+        try {
+            const response = await fetch(`${API}/tasks`, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newTaskData)
+            });
+            if (!response.ok) {
+                throw new error("Erro ao criar tarefa")
+            }
+            fetchTask()
+        }
+        catch (error) {
+            setError(error.message)
+        }
+    };
+
+    const handlerDetest = async (db_id) => {
+        if (!window.confirm("Certeza que deseja deletar a tarefa")) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API}/tasks/${db_id}`, {
+                method: "DELETE",
+            });
+
+            if (!response.ok) {
+                throw new error("Erro ao deletar a terefa")
+            }
+            fetchTask();
+        }
+        catch (error) {
+            setError(error.message)
+        }
+    };
+
+    useEffect(() => {
+        fetchTask();
+    }, [fetchTask])
 
     const onDragEnd = (result) => {
         const {destination, source, draggableId} = result;
@@ -286,7 +313,7 @@ function App() {
                                             return task;
                                         })
                                         .filter(task => task !== undefined && task !== null);
-                                    return <Column key={column.id} column={{...column, tasks}} />;
+                                    return <Column key={column.id} column={{...column, tasks}} onCreateTask={handlerCreate} onDeleteTask={handlerDetest}/>;
                                 } catch (colError) {
                                     return (
                                         <div key={columnId} style={{ padding: '20px', border: '1px solid red', color: 'red' }}>

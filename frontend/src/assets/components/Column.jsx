@@ -3,12 +3,24 @@ import { Droppable } from "react-beautiful-dnd";
 import Task from "./Tasks";
 import "./Column.css";
 
-export default function Column({column}) {
+export default function Column({column, onCreateTask, onDeleteTask}) {
     if (!column) {
         return null;
     }
 
     const tasks = column.tasks || [];
+
+    const handleAddTask = () => {
+        const nome = prompt("Nova tarefa");
+
+        if (nome && nome.trim() != "") {
+            onCreateTask(nome.trim());
+        }
+
+        if (desc && desc.trim() != "") {
+            onCreateTask(desc.trim());
+        }
+    };
 
     return (
         <div className="column-container">
@@ -24,7 +36,7 @@ export default function Column({column}) {
                     }}>
                         {tasks.length > 0 ? (
                             tasks.map((task, taskIndex) => (
-                                task ? <Task key={task.id} task={task} index={taskIndex} /> : null
+                                task ? <Task key={task.id} task={task} index={taskIndex} onDeleteTask={() => onDeleteTask(task.db_id)}/> : null
                             ))
                         ) : (
                             <div className="empty-task-message">
@@ -35,6 +47,11 @@ export default function Column({column}) {
                     </div>
                 )}
             </Droppable>
+            {column.title == "A Fazer" && (
+            <button className="addtask" onClick={handleAddTask}>
+                Adicionar nova tarefa
+            </button>
+            )}
         </div>
     );
 }

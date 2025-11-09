@@ -42,3 +42,20 @@
   margin-top: 8px;
 }
 
+.deletetask {
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: #aaa;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: all 0.2s;
+  opacity: 0.5; 
+  flex-shrink: 0; 
+}
+
+.deletetask:hover {
+  color: #c62828;
+}
+

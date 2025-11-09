@@ -5,7 +5,9 @@
   "main": "eslint.config.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "vite"
+    "dev:frontend": "vite",
+    "dev:backend": "cd ../backend && go run .",
+    "dev": "concurrently \"npm:dev:frontend\" \"npm:dev:backend\""
   },
   "keywords": [],
   "author": "",
@@ -17,6 +19,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.1.0",
+    "concurrently": "^9.2.1",
     "vite": "^7.2.2"
   }
 }

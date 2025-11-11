@@ -2,7 +2,7 @@ import React from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import './Task.css';
 
-export default function Task({ task, index, OnDeleteTask }) {
+export default function Task({ task, index, onDeleteTask }) {
   
   return (
     <Draggable draggableId={String(task.id)} index={index}>
@@ -19,7 +19,7 @@ export default function Task({ task, index, OnDeleteTask }) {
           {task.fullTask && task.fullTask.desc && (
             <div className="task-description">{task.fullTask.desc}</div>
           )}
-          <button className="deletetask" onClick={OnDeleteTask}>
+          <button className="deletetask" onClick={onDeleteTask}>
             Deletar a tarefa
           </button>
         </div>

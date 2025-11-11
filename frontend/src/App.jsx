@@ -134,23 +134,43 @@ function App() {
         }
     };
 
-    const handlerDetest = async (db_id) => {
+    const handlerDelete = async (db_id) => {
         if (!window.confirm("Certeza que deseja deletar a tarefa")) {
             return;
         }
 
         try {
+            const taskDelete = `task-${db_id}`;
+
+            setBoard(prevBoard => {
+                const newTasks = {...prevBoard.tasks};
+                delete newTasks[taskDelete];
+
+                const newColumns = {...prevBoard.columns};
+
+                Object.keys(newColumns).forEach(columnId => {
+                    newColumns[columnId] = {
+                        ...newColumns[columnId],
+                        taskIds: newColumns[columnId].taskIds.filter(id => id !== taskDelete)
+                    };
+                });
+                return {
+                    ...prevBoard,
+                    tasks: newTasks,
+                    columns: newColumns
+                };
+            });
             const response = await fetch(`${API}/tasks/${db_id}`, {
                 method: "DELETE",
             });
 
             if (!response.ok) {
-                throw new error("Erro ao deletar a terefa")
-            }
-            fetchTask();
+                throw new Error("Erro ao deletar a tarefa")
+            };
         }
         catch (error) {
-            setError(error.message)
+            setError(error.message);
+            fetchTask();
         }
     };
 
@@ -162,6 +182,11 @@ function App() {
         const {destination, source, draggableId} = result;
 
         if (!destination) {
+            return;
+        }
+
+        if (!board.tasks[draggableId]) {
+            console.warn(`${draggableId} não encontrada`);
             return;
         }
 
@@ -313,7 +338,7 @@ function App() {
                                             return task;
                                         })
                                         .filter(task => task !== undefined && task !== null);
-                                    return <Column key={column.id} column={{...column, tasks}} onCreateTask={handlerCreate} onDeleteTask={handlerDetest}/>;
+                                    return <Column key={column.id} column={{...column, tasks}} onCreateTask={handlerCreate} onDeleteTask={handlerDelete}/>;
                                 } catch (colError) {
                                     return (
                                         <div key={columnId} style={{ padding: '20px', border: '1px solid red', color: 'red' }}>
